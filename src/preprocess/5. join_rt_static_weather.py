@@ -5,7 +5,7 @@ from tqdm import tqdm
 # === Paths ===
 GTFS_RT_PARQUET = "../../data/interim/gtfs_rt_parquet/gtfs_rt_snow_filtered.parquet"
 GTFS_STATIC_BASE = "../../data/interim/gtfs_static_parquet"
-WEATHER_PARQUET = "../../data/interim/weather/weather.parquet"
+WEATHER_PARQUET = "../../data/interim/weather/final_weather.parquet"
 OUT_DIR = "../../data/interim/joined_daily"
 
 os.makedirs(OUT_DIR, exist_ok=True)
