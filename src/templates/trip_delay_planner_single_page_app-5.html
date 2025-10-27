@@ -216,7 +216,7 @@
         <div class="brand">
           <div class="logo">
             <img
-              src="../images/logo-AI.png"
+              src="{{ url_for('static', filename='images/logo-AI.png') }}"
               style="width: 45px; height: 45px; border-radius: 10px"
             />
           </div>
@@ -282,9 +282,12 @@
               <label for="route">Route</label>
               <select id="route" name="route" required>
                 <option disabled selected value="">Select a route</option>
-                {% for r in routes %}
-                <option value="{{r}}">{{r}}</option>
-                {% endfor %}
+
+                <option value="9011001000100000">Route 1</option>
+                <option value="9011001000200000">Route 2</option>
+                <option value="9011001000300000">Route 3</option>
+                <option value="9011001000400000">Route 4</option>
+                <option value="9011001050700000">Route 5</option>
               </select>
 
               <label for="routetype"> Route Type </label>
@@ -314,9 +317,12 @@
                 <option disabled selected value="">
                   Select a starting stop
                 </option>
-                {% for s in stops %}
-                <option value="{{s}}">{{s}}</option>
-                {% endfor %}
+
+                <option value="9022001010028003">S2128</option>
+                <option value="9022001010052003">S2130</option>
+                <option value="9022001010054002">S2132</option>
+                <option value="9022001010056002">S2134</option>
+                <option value="9022001010060002">S2136</option>
               </select>
 
               <!-- <label for="dest-stop">Destination Stop</label>
