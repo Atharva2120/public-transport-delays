@@ -9,7 +9,8 @@ app = Flask(__name__)
 
 # --- Load the AI Model ---
 try:
-    predictor = DelayPredictorV2("trafiklab_sim/model_artifacts_v2")
+    predictor = DelayPredictorV2(
+        "E:\Masters Materials 1st Year\Introduction to Data Science\Mini Project Source Code\ds_project\src\trafiklab_sim\model_artifacts_v2\lightgbm_incremental.pkl")
     print("AI Model loaded successfully.")
 except Exception as e:
     print(f"Error loading model: {e}")
@@ -27,7 +28,8 @@ try:
 
     # These maps translate the user-friendly names back to the IDs the model needs
     STOP_ID_MAP = dict(zip(stops_df['stop_name'], stops_df['stop_id']))
-    ROUTE_ID_MAP = dict(zip(routes_df['route_short_name'], routes_df['route_id']))
+    ROUTE_ID_MAP = dict(
+        zip(routes_df['route_short_name'], routes_df['route_id']))
     print("Successfully loaded route and stop names for dropdowns.")
 except Exception as e:
     # If this fails, the lists will be empty, and we'll see an error message in the terminal
@@ -38,6 +40,8 @@ except Exception as e:
     ROUTE_ID_MAP = {}
 
 # --- Web Page Route ---
+
+
 @app.route('/')
 def home():
     """Renders the main HTML page."""
@@ -47,46 +51,48 @@ def home():
                            stops=STOP_OPTIONS)
 
 # --- Prediction API Route ---
+
+
 @app.route('/predict', methods=['POST'])
 def predict():
-    """API endpoint to get a delay prediction."""
     if predictor is None:
         return jsonify({"error": "Model is not loaded."}), 500
 
     try:
-        data = request.json
-        print("Received prediction request:", data)
+        # Force JSON parsing
+        data = request.get_json(force=True)
+        print("📥 Received data:", data)
 
-        # Prepare data for the model
+        # Convert inputs
         departure_time = pd.to_datetime(data['departure_time'])
         departure_hour = departure_time.hour
         dow = departure_time.dayofweek
         is_weekend = 1 if dow >= 5 else 0
 
-        # Translate names from dropdowns to IDs
-        route_id = ROUTE_ID_MAP.get(data['route'])
-        origin_stop_id = STOP_ID_MAP.get(data['start_stop'])
-        dest_stop_id = STOP_ID_MAP.get(data['dest_stop'])
+        origin_stop_id = str(data['start_stop'])
+        route_id = str(data['route'])
+        route_type_id = int(data['routetype'])
 
-        if not all([route_id, origin_stop_id, dest_stop_id]):
-             return jsonify({"error": "Invalid route or stop name provided."}), 400
+        if not all([route_id, origin_stop_id, route_type_id]):
+            return jsonify({"error": "Invalid route or stop provided"}), 400
 
-        # Create the weather dictionary
+        # Convert weather values to float
         weather = {
-            "state": data['weather_state'],
+            "snow_depth": float(data['depth_cm']),
             "temp_c": float(data['temp_c']),
             "wind_ms": float(data['wind_ms']),
-            "visibility_km": float(data['visibility_km']),
-            "is_rain": 1 if data['weather_state'] == 'rain' else 0,
-            "is_snow": 1 if data['weather_state'] == 'snow' else 0,
+            "percipitation-mm": float(data['percipitation-mm']),
             "dow": dow
         }
 
-        # Call the AI predictor
+        print("🧩 Model input:", route_id, origin_stop_id,
+              route_type_id, departure_hour, weather)
+
+        # Call the predictor
         delay_sec = predictor.predict_between_stops(
             route_id=route_id,
             origin_stop_id=origin_stop_id,
-            dest_stop_id=dest_stop_id,
+            route_type_id=route_type_id,
             departure_hour=departure_hour,
             weather=weather,
             origin_departure_delay_sec=0,
@@ -95,11 +101,72 @@ def predict():
             is_weekend=is_weekend
         )
 
+        print("✅ Predicted delay:", delay_sec)
         return jsonify({'predicted_delay_seconds': round(delay_sec, 1)})
 
     except Exception as e:
-        print(f"Prediction error: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 400
+# --- OLD CODE BLOCK FOR REFERENCE ---
+
+# @app.route('/predict', methods=['POST'])
+# def predict():
+#     """API endpoint to get a delay prediction."""
+#     if predictor is None:
+#         return jsonify({"error": "Model is not loaded."}), 500
+
+#     try:
+#         data = request.get_json(force=True)
+#         print("Received prediction request:", data)
+
+#         # Prepare data for the model
+#         departure_time = pd.to_datetime(data['departure_time'])
+#         departure_hour = departure_time.hour
+#         dow = departure_time.dayofweek
+#         is_weekend = 1 if dow >= 5 else 0
+
+#         # Translate names from dropdowns to IDs
+#         # route_id = ROUTE_ID_MAP.get(data['route'])
+#         # origin_stop_id = STOP_ID_MAP.get(data['start_stop'])
+#        # dest_stop_id = STOP_ID_MAP.get(data['dest_stop'])
+#         origin_stop_id = data['start_stop']
+#         route_id = data['route']
+#         route_type_id = (data['routetype'])
+
+#         if not all([route_id, origin_stop_id, route_type_id]):
+#             return jsonify({"error": "Invalid route or stop name provided."}), 400
+
+#         # Create the weather dictionary
+#         weather = {
+#             "snow_depth": float['depth_cm'],
+#             "temp_c": float(data['temp_c']),
+#             "wind_ms": float(data['wind_ms']),
+#             "percipitation-mm": float(data['percipitation-mm']),
+#             # "is_rain": 1 if data['weather_state'] == 'rain' else 0,
+#             # "is_snow": 1 if data['weather_state'] == 'snow' else 0,
+#             "dow": dow
+#         }
+
+#         # Call the AI predictor
+#         delay_sec = predictor.predict_between_stops(
+#             route_id=route_id,
+#             origin_stop_id=origin_stop_id,
+#             route_type_id=route_type_id,
+#             departure_hour=departure_hour,
+#             weather=weather,
+#             origin_departure_delay_sec=0,
+#             headway_min=15,
+#             dow=dow,
+#             is_weekend=is_weekend
+#         )
+
+#         return jsonify({'predicted_delay_seconds': round(delay_sec, 1)})
+
+#     except Exception as e:
+#         print(f"Prediction error: {e}")
+#         return jsonify({'error': str(e)}), 400
+
 
 # --- Main entry point to run the server ---
 if __name__ == '__main__':
