@@ -10,8 +10,18 @@ A machine learning project that predicts whether a public transport trip will be
 - Interactive Streamlit UI for prediction
 - Feature-importance visualization
 - Optional CSV upload for quick analysis
+- Notebook for delay-duration regression modeling
 
 ---
+
+## 🖼️ Screenshots
+> Add the following image files to `docs/images/` and the screenshots will render here:
+
+- `docs/images/dataset-preview.png` (dataset sample)
+- `docs/images/streamlit-ui.png` (Streamlit app)
+
+![Dataset preview](docs/images/dataset-preview.png)
+![Streamlit app](docs/images/streamlit-ui.png)
 
 ---
 
@@ -21,6 +31,7 @@ public-transport-delays/
 ├── app.py                 # Streamlit app
 ├── main.py                # Model training script
 ├── data/                  # Dataset folder (public_transport_delays.csv)
+├── notebooks/             # Jupyter notebooks
 ├── outputs/               # Saved model + encoders
 ├── requirements.txt
 └── README.md
@@ -45,6 +56,17 @@ The dataset contains trip, schedule, weather, and event signals used to predict 
 
 **Leakage columns removed during training:**
 - `actual_arrival_delay_min`, `actual_departure_delay_min`
+
+---
+
+## 📓 Notebook: Delay Duration Prediction
+A regression notebook is available at:
+
+- `notebooks/delay_duration_model.ipynb`
+
+It trains a RandomForestRegressor pipeline with preprocessing and evaluates MAE/RMSE/R². The trained model is saved to:
+
+- `outputs/delay_duration_model.pkl`
 
 ---
 
