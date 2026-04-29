@@ -13,15 +13,6 @@ A machine learning project that predicts whether a public transport trip will be
 
 ---
 
-## 🖼️ Screenshots
-> Add the following image files to `docs/images/` and the screenshots will render here:
-
-- `docs/images/dataset-preview.png` (dataset sample)
-- `docs/images/streamlit-ui.png` (Streamlit app)
-
-![Dataset preview](docs/images/dataset-preview.png)
-![Streamlit app](docs/images/streamlit-ui.png)
-
 ---
 
 ## 🗂 Project Structure
